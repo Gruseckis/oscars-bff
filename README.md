@@ -8,3 +8,8 @@ rename `.env.template` file to `.env` file and set missing variables if needed
 ### Run project
 
 run script `npm start` to start the server
+
+
+### Authors
+
+G and M
