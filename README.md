@@ -10,3 +10,7 @@ rename `.env.template` file to `.env` file and set missing variables if needed
 run script `npm run dev` to build and run in development mode with watch option
 
 run script `npm start` to build and start the server
+
+### Authors
+
+G and M
