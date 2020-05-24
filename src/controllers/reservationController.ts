@@ -87,6 +87,16 @@ export class ReservationController {
     // TODO: Send notification to customer
   }
 
+  public async markAsComplete(req: IRequestWithUser, res: express.Response) {
+    if (!req.params.id) {
+      return res.status(400).send({ error: { message: 'Reservation id required', fields: [] } });
+    }
+
+    const reservation = await dbController.changeReservationStatus(req.params.id, 'Completed');
+    res.status(200).send({ payload: { message: 'Reservation completed', reservation } });
+    // TODO: Send notification to customer
+  }
+
   public async findItem(req: IRequestWithUser, res: express.Response) {
     const guid = req.query.guid as string;
     const businessId = req.query.businessId as string;

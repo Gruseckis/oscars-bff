@@ -7,6 +7,8 @@ router.post('/:id/quote', reservationController.quoteRepair.bind(reservationCont
 
 router.get('/:id/approve', reservationController.aproveReservation.bind(reservationController));
 
+router.post('/:id/complete');
+
 router.get('/find', reservationController.findItem.bind(reservationController));
 
 router.get('/new', reservationController.getPendingReservations.bind(reservationController));
