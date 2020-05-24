@@ -10,6 +10,32 @@ export interface IUserModel extends mongoose.Document {
   phoneNumber: string;
 }
 
+export interface IQuoteModel extends mongoose.Document {
+  price: number;
+  repairDuration: number;
+  status: QuoteStatus;
+}
+
+export interface IReservationModel extends mongoose.Document {
+  customerReference: string;
+  reservationDate: Date;
+  status: ReservationStatus;
+  customer: IUserModel | string;
+  quotes: IQuoteModel[] | string[];
+}
+
+export type QuoteStatus = 'Active' | 'Accepted' | 'Declined';
+
+export type ReservationStatus =
+  | 'New'
+  | 'Confirmed'
+  | 'Inspecting'
+  | 'Quoted'
+  | 'Qoute accepted'
+  | 'Repairs'
+  | 'Billed'
+  | 'Completed';
+
 export interface IRequestWithUser extends express.Request {
   user: IUserModel;
 }
