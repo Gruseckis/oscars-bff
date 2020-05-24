@@ -1,5 +1,5 @@
 import express, { NextFunction } from 'express';
-import DataBaseController from './dbControlle';
+import { dbController } from './dbController';
 import {
   RegistrationForm,
   LoginInformation,
@@ -10,14 +10,9 @@ import {
 import jwt from 'jsonwebtoken';
 
 export class AuthController {
-  private dbController: DataBaseController;
-
-  constructor() {
-    this.dbController = new DataBaseController();
-  }
   public async register(req: express.Request, res: express.Response) {
     const reqBody: RegistrationForm = req.body;
-    const duplicate = await this.dbController.findUserByEmail(reqBody.email);
+    const duplicate = await dbController.findUserByEmail(reqBody.email);
     if (duplicate) {
       return res.status(400).send({ error: { message: 'User already exists', fields: ['email'] } });
     }
@@ -26,7 +21,7 @@ export class AuthController {
         error: { message: 'Password do not match', fields: ['password', 'passwordConfirmation'] },
       });
     }
-    const user = await this.dbController.saveUser(reqBody);
+    const user = await dbController.saveUser(reqBody);
 
     res.status(201).send({ payload: { message: 'Successfully registered', user } });
   }
@@ -37,7 +32,7 @@ export class AuthController {
       if (!loginInfo.email || !loginInfo.password) {
         throw new Error('Wrong cridentials');
       }
-      const user: IUserModel = await this.dbController.loginUser(loginInfo);
+      const user: IUserModel = await dbController.loginUser(loginInfo);
       const token = jwt.sign(
         {
           data: {
@@ -62,22 +57,29 @@ export class AuthController {
   }
 
   public async authentication(req: IRequestWithUser, res: express.Response, next: NextFunction) {
-    const { authorization } = req.headers;
-    let token;
-    if (authorization) {
-      [, token] = authorization.split(' ');
-    }
-    if (token) {
-      const decodedToken: DecodedToken = jwt.verify(token, process.env.JWT_SECRET) as DecodedToken;
-      if (decodedToken && decodedToken.data && decodedToken.data.email) {
-        const user = await this.dbController.findUserByEmail(decodedToken.data.email);
-        if (user) {
-          req.user = user;
-          return next();
+    try {
+      const { authorization } = req.headers;
+      let token;
+      if (authorization) {
+        [, token] = authorization.split(' ');
+      }
+      if (token) {
+        const decodedToken: DecodedToken = jwt.verify(
+          token,
+          process.env.JWT_SECRET
+        ) as DecodedToken;
+        if (decodedToken && decodedToken.data && decodedToken.data.email) {
+          const user = await dbController.findUserByEmail(decodedToken.data.email);
+          if (user) {
+            req.user = user;
+            return next();
+          }
         }
       }
+      res.status(401).send({ error: { message: 'Authentication failed', fields: [] } });
+    } catch (error) {
+      res.status(401).send({ error: { message: 'Authentication failed', fields: [] } });
     }
-    res.status(401).send({ error: { message: 'Authentication failed', fields: [] } });
   }
 }
 
